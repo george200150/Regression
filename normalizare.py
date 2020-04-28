@@ -43,15 +43,27 @@ def plotDataHistogram(x, variableName):
     plt.show()
 
 
-
+class stdNorm:
+    def __init__(self):
+        self.mean = None
+        self.stdev = None
+    
+    def statisticalNormalisation(self, features):
+        if self.mean is None or self.stdev is None:
+            self.mean = mean(features)
+            self.stdev = stdev(features)
+        normalisedFeatures = [(feat - self.mean) / self.stdev for feat in features]
+        return normalisedFeatures
+        
+        
 # statistical normalisation (centered around meand and standardisation)
-def statisticalNormalisation(features):
+'''def statisticalNormalisation(features):
     # meanValue = sum(features) / len(features)
     meanValue = mean(features)
     # stdDevValue = (1 / len(features) * sum([ (feat - meanValue) ** 2 for feat in features])) ** 0.5 
     stdDevValue = stdev(features)
     normalisedFeatures = [(feat - meanValue) / stdDevValue for feat in features]
-    return normalisedFeatures
+    return normalisedFeatures'''
 
 
 
@@ -87,3 +99,4 @@ if __name__ == '__main__':
     plt.xlabel('alcohol')
     plt.ylabel('malic acid')
     plt.show()
+

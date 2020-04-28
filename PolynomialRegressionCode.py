@@ -1,49 +1,69 @@
 '''
 Created on 25 apr. 2020
-
 @author: George
 '''
 import pandas as pd
-import numpy as np
+#import Mynumpy as np
+#from Mynumpy import linspace,\
+#c_ as columnAppend, ones, square, sum, power
+from numpy import linspace,\
+c_ as columnAppend, ones, square, sum, power
+from numpy.linalg import inv
+#from Mynumpy import inv
 import matplotlib.pyplot as plt
 
-"""
-# Load and plot data files
-"""
-# Load the training data hw1xtr.dat and hw1ytr.dat into the memory
-trainInputFeatures = pd.read_csv('xTrain.dat',  header = None) 
-trainOutputs = pd.read_csv('yTrain.dat', header = None) 
 
-# Load the test data hw1xte.dat and hw1yte.dat into the memory
-test_features = pd.read_csv('xTest.dat',  header = None) 
-test_desired_outputs = pd.read_csv('yTest.dat', header = None) 
+def loadData():
+    """
+    # Load and plot data files
+    """
+    # Load the training data
+    trainInputFeatures = pd.read_csv('xTrain.dat',  header = None) 
+    trainOutputs = pd.read_csv('yTrain.dat', header = None) 
+    
+    # Load the test data
+    testFeatures = pd.read_csv('xTest.dat',  header = None) 
+    testRealOutputs = pd.read_csv('yTest.dat', header = None) 
+    
+    # # Plot training data and real outputs
+    trainXFeatures = trainInputFeatures.values
+    trainYOutputs = trainOutputs.values
+    plt.scatter(trainXFeatures, trainYOutputs, color = 'g', marker = '*', s = 30)
+    
+    # # Plot training data and real outputs
+    plt.scatter(testFeatures.values, testRealOutputs.values, color = 'b', marker = 'o', s = 30)
+    plt.title('Training and Testing Data')
+    plt.show()
+    
+    return trainInputFeatures, trainOutputs, testFeatures, testRealOutputs
 
-# # Plot training_data and desired_outputs
-trainXFeatures = trainInputFeatures.values
-trainYOutputs = trainOutputs.values
-plt.scatter(trainXFeatures, trainYOutputs, color = 'g', marker = '*', s = 30)
-
-# # Plot training_data and desired_outputs
-plt.scatter(test_features.values, test_desired_outputs.values, color = 'b', marker = 'o', s = 30)
-plt.title('Training and Testing Data')
-plt.show()
 
 
-
-
-
-
-"""
-# Train linear regression model on training set
-"""
-trainXFeatures = trainInputFeatures.values
-trainYOutputs = trainOutputs.values
-
-N = len(trainInputFeatures)
-X = np.c_[np.ones(N), trainXFeatures]
-A = np.linalg.inv(X.T@X)
-D = A@X.T
-result = D@trainYOutputs
+def trainLinearRegression(trainInputFeatures, trainOutputs):
+    """
+    # Train linear regression model on training set
+    """
+    trainXFeatures = trainInputFeatures.values
+    trainYOutputs = trainOutputs.values
+    
+    N = len(trainInputFeatures)
+    X = columnAppend[ones(N), trainXFeatures]
+    A = inv(X.T@X)
+    D = A@X.T
+    result = D@trainYOutputs
+    
+    # Plot scatter plot
+    plt.scatter(trainXFeatures, trainYOutputs, color = 'm', marker = 'o', s = 30)
+    plotRegressionCurve1(trainXFeatures, trainYOutputs, result)
+    
+    # Find average error on the training set
+    A = square(yPredicted - trainYOutputs)
+    error = sum(A) / N
+    #print('MSE:')
+    print('Train 1st-order regression model on training set')
+    print('Average error on the training set: ', error)
+    
+    return result
 
 yPredicted = []
 def plotRegressionCurve1(x, y, b): 
@@ -64,28 +84,23 @@ def plotRegressionCurve1(x, y, b):
     # Function to show plot 
     plt.show() 
 
-# Plot scatter plot
-plt.scatter(trainXFeatures, trainYOutputs, color = 'm', marker = 'o', s = 30)
-plotRegressionCurve1(trainXFeatures, trainYOutputs, result)
 
-# Find average error on the training set
-A = np.square(yPredicted - trainYOutputs)
-error = np.sum(A) / N
-#print('MSE:')
-print('Train 1st-order regression model on training set')
-print('Average error on the training set: ', error)
-
-
-
-
-
-"""
-# Test linear regression model on testing set
-"""
-testXFeatures = test_features.values
-testYOutputs = test_desired_outputs.values
-
-plt.scatter(testXFeatures, test_desired_outputs, color = 'b', marker = 'o', s = 30)
+def testLR(testFeatures, testRealOutputs, result):
+    """
+    # Test linear regression model on testing set
+    """
+    testXFeatures = testFeatures.values
+    testYOutputs = testRealOutputs.values
+    
+    plt.scatter(testXFeatures, testRealOutputs, color = 'b', marker = 'o', s = 30)
+    
+    plotRegressionCurve2(testXFeatures, testYOutputs, result)
+    
+    # Find average error on the training set
+    A = square(testYPredicted - testYOutputs)
+    error = sum(A) / testXFeatures.shape[0]
+    print('Average error on the testing set: ', error)
+    print('1st-order linear regression')
 
 testYPredicted = []
 def plotRegressionCurve2(x, y, b): 
@@ -106,40 +121,44 @@ def plotRegressionCurve2(x, y, b):
     # Function to show plot 
     plt.show() 
 
-plotRegressionCurve2(testXFeatures, testYOutputs, result)
-
-# Find average error on the training set
-A = np.square(testYPredicted - testYOutputs)
-error = np.sum(A) / testXFeatures.shape[0]
-print('Average error on the testing set: ', error)
-print('1st-order linear regression')
 
 
-
-
-"""
-# Train 2nd-order regression model on training set
-"""
-trainXFeatures = trainInputFeatures.values
-trainYOutputs = trainOutputs.values
-
-# # Plot scatter plot
-# plt.scatter(trainXFeatures, trainYOutputs, color = 'm', marker = 'o', s = 30)
-
-N = len(trainInputFeatures)
-X = np.c_[np.ones(N), trainXFeatures, np.square(trainInputFeatures)]
-A = np.linalg.inv(X.T@X)
-D = A@X.T
-result = D@trainYOutputs
+def train2OrderPolynomialRegression(trainInputFeatures, trainOutputs):
+    """
+    # Train 2nd-order regression model on training set
+    """
+    trainXFeatures = trainInputFeatures.values
+    trainYOutputs = trainOutputs.values
+    
+    # # Plot scatter plot
+    # plt.scatter(trainXFeatures, trainYOutputs, color = 'm', marker = 'o', s = 30)
+    
+    N = len(trainInputFeatures)
+    X = columnAppend[ones(N), trainXFeatures, square(trainInputFeatures)]
+    A = inv(X.T@X)
+    D = A@X.T
+    result = D@trainYOutputs
+    
+    # Plot scatter plot
+    plt.scatter(trainXFeatures, trainYOutputs, color = 'm', marker = 'o', s = 30)
+    plotRegressionCurve3(trainXFeatures, trainYOutputs, result)
+    plt.show() 
+    
+    # Find average error on the training set
+    A = square(result[2] * square(trainXFeatures) + result[1] * trainXFeatures + result[0]  - trainYOutputs)
+    error = sum(A) / N
+    print('\n\nTrain 2nd-order regression model on training set')
+    print('Average error on the training set: ', error)
+    return result
 
 yPredicted = []
 def plotRegressionCurve3(x, y, b): 
     # plotting the actual points as scatter plot 
     plt.scatter(x, y, color = "b", marker = "o", s = 30) 
 
-    xLine = np.linspace(trainXFeatures.min(), trainXFeatures.max(), 100)
+    xLine = linspace(x.min(), x.max(), 100)
     global yPredicted
-    yPredicted = b[2] * np.square(xLine) + b[1] * xLine + b[0] 
+    yPredicted = b[2] * square(xLine) + b[1] * xLine + b[0] 
     regressionCurve = yPredicted
     # Plotting the regression line 
     plt.plot(xLine, regressionCurve, color = "orange") 
@@ -147,37 +166,35 @@ def plotRegressionCurve3(x, y, b):
     plt.xlabel('x') 
     plt.ylabel('y')     
 
-# Plot scatter plot
-plt.scatter(trainXFeatures, trainYOutputs, color = 'm', marker = 'o', s = 30)
-plotRegressionCurve3(trainXFeatures, trainYOutputs, result)
-plt.show() 
-
-# Find average error on the training set
-A = np.square(result[2] * np.square(trainXFeatures) + result[1] * trainXFeatures + result[0]  - trainYOutputs)
-error = np.sum(A) / N
-print('\n\nTrain 2nd-order regression model on training set')
-print('Average error on the training set: ', error)
 
 
-
-
-
-"""
-# Test 2nd-order regression model on testing set
-"""
-testXFeatures = test_features.values
-testYOutputs = test_desired_outputs.values
-
-plt.scatter(testXFeatures, test_desired_outputs, color = 'b', marker = 'o', s = 30)
+def test2PR(testFeatures, testRealOutputs, result):
+    """
+    # Test 2nd-order regression model on testing set
+    """
+    testXFeatures = testFeatures.values
+    testYOutputs = testRealOutputs.values
+    
+    plt.scatter(testXFeatures, testRealOutputs, color = 'b', marker = 'o', s = 30)
+    
+    plt.scatter(testXFeatures, testRealOutputs, color = 'b', marker = 'o', s = 30)
+    plotRegressionCurve4(testXFeatures, testYOutputs, result)
+    plt.show() 
+    
+    # Find average error on the training set
+    A = square(result[2] * square(testXFeatures) + result[1] * testXFeatures + result[0]  - testYOutputs)
+    error = sum(A) / testXFeatures.shape[0]
+    print('Average error on the testing set: ', error)
+    print('2nd-order polynomial regression')
 
 yPredicted = []
 def plotRegressionCurve4(x, y, b): 
     # Plotting the actual points as scatter plot 
     plt.scatter(x, y, color = "b", marker = "o", s = 30) 
 
-    xLine = np.linspace(trainXFeatures.min(), trainXFeatures.max(), 100)
+    xLine = linspace(x.min(), x.max(), 100)
     global yPredicted
-    yPredicted = b[2] * np.square(xLine) + b[1] * xLine + b[0] 
+    yPredicted = b[2] * square(xLine) + b[1] * xLine + b[0] 
     regressionCurve = yPredicted
     # Plotting the regression line 
     plt.plot(xLine, regressionCurve, color = "orange") 
@@ -186,80 +203,81 @@ def plotRegressionCurve4(x, y, b):
     plt.xlabel('x') 
     plt.ylabel('y') 
 
-plt.scatter(testXFeatures, test_desired_outputs, color = 'b', marker = 'o', s = 30)
-plotRegressionCurve4(testXFeatures, testYOutputs, result)
-plt.show() 
-
-# Find average error on the training set
-A = np.square(result[2] * np.square(testXFeatures) + result[1] * testXFeatures + result[0]  - testYOutputs)
-error = np.sum(A) / testXFeatures.shape[0]
-print('Average error on the testing set: ', error)
-print('2nd-order polynomial regression')
 
 
-
-
-
-"""
-# Train 3rd-order regression model on training set
-"""
-trainXFeatures = trainInputFeatures.values
-trainYOutputs = trainOutputs.values
-
-# Plot scatter plot
-plt.scatter(trainXFeatures, trainYOutputs, color = 'm', marker = 'o', s = 30)
-
-N = len(trainInputFeatures)
-X = np.c_[np.ones(N), trainXFeatures, np.square(trainInputFeatures), np.power(trainInputFeatures, 3)]
-A = np.linalg.inv(X.T@X)
-D = A@X.T
-result = D@trainYOutputs
+def train3OrderPolynomialRegression(trainInputFeatures, trainOutputs):
+    """
+    # Train 3rd-order regression model on training set
+    """
+    trainXFeatures = trainInputFeatures.values
+    trainYOutputs = trainOutputs.values
+    
+    # Plot scatter plot
+    plt.scatter(trainXFeatures, trainYOutputs, color = 'm', marker = 'o', s = 30)
+    
+    N = len(trainInputFeatures)
+    X = columnAppend[ones(N), trainXFeatures, square(trainInputFeatures), power(trainInputFeatures, 3)]
+    A = inv(X.T@X)
+    D = A@X.T
+    result = D@trainYOutputs
+    
+    plotRegressionCurve5(trainXFeatures, trainYOutputs, result)
+    plt.show() 
+    
+    # Find average error on the training set
+    A = square(result[3] * power(trainXFeatures, 3) + result[2] * square(trainXFeatures) + result[1] * trainXFeatures + result[0]  - trainYOutputs)
+    error = sum(A) / N
+    print('\n\nTrained the 3nd-order polynomial model on the training set')
+    print('Average error on the training set: ', error)
+    
+    return result
 
 yPredicted = []
-def plotRegressionCurve5(x, y, b): 
-    # Plotting the actual points as scatter plot 
-    plt.scatter(x, y, color = "b", marker = "o", s = 30) 
-
-    xLine = np.linspace(trainXFeatures.min(), trainXFeatures.max(), 100)
+def plotRegressionCurve5(x, y, b):
+    # Plotting the actual points as scatter plot
+    plt.scatter(x, y, color = "b", marker = "o", s = 30)
+    
+    xLine = linspace(x.min(), x.max(), 100)
     global yPredicted
-    yPredicted = b[3] * np.power(xLine, 3) + b[2] * np.square(xLine) + b[1] * xLine + b[0]     
+    yPredicted = b[3] * power(xLine, 3) + b[2] * square(xLine) + b[1] * xLine + b[0]
     regressionCurve = yPredicted
-    # Plotting the regression line 
-    plt.plot(xLine, regressionCurve, color = "orange") 
-
-    # Putting labels 
-    plt.xlabel('x') 
-    plt.ylabel('y') 
-
-plotRegressionCurve5(trainXFeatures, trainYOutputs, result)
-plt.show() 
-
-# Find average error on the training set
-A = np.square(result[3] * np.power(trainXFeatures, 3) + result[2] * np.square(trainXFeatures) + result[1] * trainXFeatures + result[0]  - trainYOutputs)
-error = np.sum(A) / N
-print('\n\nTrained the 3nd-order polynomial model on the training set')
-print('Average error on the training set: ', error)
+    # Plotting the regression line
+    plt.plot(xLine, regressionCurve, color = "orange")
+    # Putting labels
+    plt.xlabel('x')
+    plt.ylabel('y')
 
 
 
 
-
-"""
-# Test 3rd-order regression model on testing set
-"""
-testXFeatures = test_features.values
-testYOutputs = test_desired_outputs.values
-
-plt.scatter(testXFeatures, test_desired_outputs, color = 'b', marker = 'o', s = 30)
+def test3PR(testFeatures, testRealOutputs, result):
+    """
+    # Test 3rd-order regression model on testing set
+    """
+    testXFeatures = testFeatures.values
+    testYOutputs = testRealOutputs.values
+    
+    plt.scatter(testXFeatures, testRealOutputs, color = 'b', marker = 'o', s = 30)
+    
+    
+    
+    plotRegressionCurve6(testXFeatures, testYOutputs, result)
+    plt.show() 
+    
+    # Find average error on the training set
+    A = square(result[3] * power(testXFeatures, 3) + result[2] * square(testXFeatures) + result[1] * testXFeatures + result[0]  - testYOutputs)
+    error = sum(A) / testXFeatures.shape[0]
+    print('Average error on the testing set: ', error)
+    print('3rd-order polynomial regression')
 
 yPredicted = []
 def plotRegressionCurve6(x, y, b): 
     # Plotting the actual points as scatter plot 
     plt.scatter(x, y, color = "b", marker = "o", s = 30) 
 
-    xLine = np.linspace(testXFeatures.min(), testXFeatures.max(), 100)
+    xLine = linspace(x.min(), x.max(), 100)
     global yPredicted
-    yPredicted = b[3] * np.power(xLine, 3) + b[2] * np.square(xLine) + b[1] * xLine + b[0] 
+    yPredicted = b[3] * power(xLine, 3) + b[2] * square(xLine) + b[1] * xLine + b[0] 
     regressionCurve = yPredicted
     # Plotting the regression line 
     plt.plot(xLine, regressionCurve, color = "orange") 
@@ -267,43 +285,44 @@ def plotRegressionCurve6(x, y, b):
     plt.xlabel('x') 
     plt.ylabel('y') 
 
-plotRegressionCurve6(testXFeatures, testYOutputs, result)
-plt.show() 
-
-# Find average error on the training set
-A = np.square(result[3] * np.power(testXFeatures, 3) + result[2] * np.square(testXFeatures) + result[1] * testXFeatures + result[0]  - testYOutputs)
-error = np.sum(A) / testXFeatures.shape[0]
-print('Average error on the testing set: ', error)
-print('3rd-order polynomial regression')
 
 
 
-
-
-
-"""
-# Train 4th-order regression model on training set
-"""
-trainXFeatures = trainInputFeatures.values
-trainYOutputs = trainOutputs.values
-
-# Plot scatter plot
-plt.scatter(trainXFeatures, trainYOutputs, color = 'm', marker = 'o', s = 30)
-
-N = len(trainInputFeatures)
-X = np.c_[np.ones(N), trainXFeatures, np.square(trainInputFeatures), np.power(trainInputFeatures, 3), np.power(trainInputFeatures, 4)]
-A = np.linalg.inv(X.T@X)
-D = A@X.T
-result = D@trainYOutputs
+def train4OrderPolynomialRegression(trainInputFeatures, trainOutputs):
+    """
+    # Train 4th-order regression model on training set
+    """
+    trainXFeatures = trainInputFeatures.values
+    trainYOutputs = trainOutputs.values
+    
+    # Plot scatter plot
+    plt.scatter(trainXFeatures, trainYOutputs, color = 'm', marker = 'o', s = 30)
+    
+    N = len(trainInputFeatures)
+    X = columnAppend[ones(N), trainXFeatures, square(trainInputFeatures), power(trainInputFeatures, 3), power(trainInputFeatures, 4)]
+    A = inv(X.T@X)
+    D = A@X.T
+    result = D@trainYOutputs
+    
+    plotRegressionCurve7(trainXFeatures, trainYOutputs, result)
+    plt.show() 
+    
+    # Find average error on the training set
+    A = square(result[4] * power(trainXFeatures, 4) + result[3] * power(trainXFeatures, 3) + result[2] * square(trainXFeatures) + result[1] * trainXFeatures + result[0]  - trainYOutputs)
+    error = sum(A) / N
+    print('\n\nTrain 4th-order regression model on training set')
+    print('Average error on the training set: ', error)
+    
+    return result
 
 yPredicted = []
 def plotRegressionCurve7(x, y, b): 
     # Plotting the actual points as scatter plot 
     plt.scatter(x, y, color = "b", marker = "o", s = 30) 
 
-    xLine = np.linspace(trainXFeatures.min(), trainXFeatures.max(), 100)
+    xLine = linspace(x.min(), x.max(), 100)
     global yPredicted
-    yPredicted = b[4] *  np.power(xLine, 4) + b[3] * np.power(xLine, 3) + b[2] * np.square(xLine) + b[1] * xLine + b[0] 
+    yPredicted = b[4] *  power(xLine, 4) + b[3] * power(xLine, 3) + b[2] * square(xLine) + b[1] * xLine + b[0] 
     regressionCurve = yPredicted
     # Plotting the regression line 
     plt.plot(xLine, regressionCurve, color = "orange") 
@@ -311,35 +330,33 @@ def plotRegressionCurve7(x, y, b):
     plt.xlabel('x') 
     plt.ylabel('y') 
 
-plotRegressionCurve7(trainXFeatures, trainYOutputs, result)
-plt.show() 
-
-# Find average error on the training set
-A = np.square(result[4] * np.power(trainXFeatures, 4) + result[3] * np.power(trainXFeatures, 3) + result[2] * np.square(trainXFeatures) + result[1] * trainXFeatures + result[0]  - trainYOutputs)
-error = np.sum(A) / N
-print('\n\nTrain 4th-order regression model on training set')
-print('Average error on the training set: ', error)
 
 
-
-
-
-"""
-# Test 4th-order regression model on testing set
-"""
-testXFeatures = test_features.values
-testYOutputs = test_desired_outputs.values
-
-plt.scatter(testXFeatures, test_desired_outputs, color = 'b', marker = 'o', s = 30)
+def test4PR(testFeatures, testRealOutputs, result):
+    """
+    # Test 4th-order regression model on testing set
+    """
+    testXFeatures = testFeatures.values
+    testYOutputs = testRealOutputs.values
+    
+    plt.scatter(testXFeatures, testRealOutputs, color = 'b', marker = 'o', s = 30)
+    plotRegressionCurve8(testXFeatures, testYOutputs, result)
+    plt.show() 
+    
+    # Find average error on the training set
+    A = square(result[4] * power(testXFeatures, 4) + result[3] * power(testXFeatures, 3) + result[2] * square(testXFeatures) + result[1] * testXFeatures + result[0]  - testYOutputs)
+    error = sum(A) / testXFeatures.shape[0]
+    print('Average error on the testing set: ', error)
+    print('4th-order polynomial regression')
 
 yPredicted = []
 def plotRegressionCurve8(x, y, b): 
     # Plotting the actual points as scatter plot 
     plt.scatter(x, y, color = "b", marker = "o", s = 30) 
 
-    xLine = np.linspace(testXFeatures.min(), testXFeatures.max(), 100)
+    xLine = linspace(x.min(), x.max(), 100)
     global yPredicted
-    yPredicted = b[4] * np.power(xLine, 4) + b[3] * np.power(xLine, 3) + b[2] * np.square(xLine) + b[1] * xLine + b[0] 
+    yPredicted = b[4] * power(xLine, 4) + b[3] * power(xLine, 3) + b[2] * square(xLine) + b[1] * xLine + b[0] 
     regressionCurve = yPredicted
     # Plotting the regression line 
     plt.plot(xLine, regressionCurve, color = "orange") 
@@ -348,17 +365,20 @@ def plotRegressionCurve8(x, y, b):
     plt.xlabel('x') 
     plt.ylabel('y')     
 
-plotRegressionCurve8(testXFeatures, testYOutputs, result)
-plt.show() 
-
-# Find average error on the training set
-A = np.square(result[4] * np.power(testXFeatures, 4) + result[3] * np.power(testXFeatures, 3) + result[2] * np.square(testXFeatures) + result[1] * testXFeatures + result[0]  - testYOutputs)
-error = np.sum(A) / testXFeatures.shape[0]
-print('Average error on the testing set: ', error)
-print('4th-order polynomial regression')
 
 
 
-
-
-
+if __name__ == '__main__':
+    trainInputFeatures, trainOutputs, testFeatures, testRealOutputs = loadData()
+    
+    result = trainLinearRegression(trainInputFeatures, trainOutputs)
+    testLR(testFeatures, testRealOutputs, result)
+    
+    result = train2OrderPolynomialRegression(trainInputFeatures, trainOutputs)
+    test2PR(testFeatures, testRealOutputs, result)
+    
+    result = train3OrderPolynomialRegression(trainInputFeatures, trainOutputs)
+    test3PR(testFeatures, testRealOutputs, result)
+    
+    result = train4OrderPolynomialRegression(trainInputFeatures, trainOutputs)
+    test4PR(testFeatures, testRealOutputs, result)

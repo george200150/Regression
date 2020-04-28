@@ -9,7 +9,7 @@ Created on 24 apr. 2020
 
 import Regression
 from sklearn.metrics.regression import mean_squared_error
-from normalizare import statisticalNormalisation
+from normalizare import stdNorm
 
 def plotData(x1, y1, x2 = None, y2 = None, x3 = None, y3 = None, title = None):
     plt.plot(x1, y1, 'ro', label = 'train data')
@@ -22,9 +22,10 @@ def plotData(x1, y1, x2 = None, y2 = None, x3 = None, y3 = None, title = None):
     plt.show()
 
 from random import seed
-import os, numpy as np
+import os
+import numpy as np
 from utils import *
-from random import seed
+
 
 # *two hundred plots later*
 def fun():
@@ -41,17 +42,28 @@ def fun():
     trainSample = np.random.choice(indexes, int(0.8 * len(inputs)), replace = False)
     testSample = [i for i in indexes  if not i in trainSample]
     
-    #NORMALIZATION OF TRAIN DATA
-    trainInputs = [inputs[i] for i in trainSample]
-    trainInputs = statisticalNormalisation(trainInputs)
-    trainOutputs = [outputs[i] for i in trainSample]
-    trainOutputs = statisticalNormalisation(trainOutputs)
     
-    #NORMALIZATION OF TEST DATA
+    trainInputs = [inputs[i] for i in trainSample]
     testInputs = [inputs[i] for i in testSample]
-    testInputs = statisticalNormalisation(testInputs)
+    
+    trainOutputs = [outputs[i] for i in trainSample]
     testOutputs = [outputs[i] for i in testSample]
-    testOutputs = statisticalNormalisation(testOutputs)
+    
+    norm = stdNorm()
+    featuresComplet = []
+    for feat in trainInputs:
+        featuresComplet.append(feat)
+    for feat in testInputs:
+        featuresComplet.append(feat)
+    '''for feat in trainOutputs:
+        featuresComplet.append(feat)
+    for feat in testOutputs:
+        featuresComplet.append(feat)'''
+    norm.statisticalNormalisation(featuresComplet)
+    #NORMALIZATION OF TRAIN DATA
+    trainInputs = norm.statisticalNormalisation(trainInputs)
+    #NORMALIZATION OF TEST DATA
+    testInputs = norm.statisticalNormalisation(testInputs)
     
     
     plotDataHistogram(trainInputs+testInputs, 'Capita GDP')
@@ -66,7 +78,7 @@ def fun():
     #regressor = linear_model.LinearRegression()
     #regressor = regression.MyLinearUnivariateRegression()
     #regressor = Regression.MySGDRegression()
-    regressor = Regression.MyBatchRegression()
+    regressor = Regression.MySGDRegression()
     regressor.fit(xx, trainOutputs) # FIT SINGLE MATRIX of noSamples x noFeatures
     
     w0, w1 = regressor.intercept_, regressor.coef_[0]

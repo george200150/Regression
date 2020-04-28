@@ -3,6 +3,7 @@ Created on 25 apr. 2020
 
 @author: George
 '''
+import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
 import matplotlib.pyplot as plt
@@ -10,7 +11,7 @@ from sklearn.linear_model import SGDRegressor
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
-import numpy as np
+#import  as np
 import random
 
 from regresieGBP_Freedom import inputRead

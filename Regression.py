@@ -4,7 +4,6 @@ Created on 24 apr. 2020
 @author: George
 '''
 
-import random
 import numpy as np
 from theano.sandbox.cuda.basic_ops import row
 
@@ -17,7 +16,7 @@ class MySGDRegression:
     def fit(self, x, y, learningRate = 0.001, noEpochs = 1000):
         self.coef_ = [0.0 for _ in range(len(x[0]) + 1)]    #beta or w coefficients y = w0 + w1 * x1 + w2 * x2 + ...
         # self.coef_ = [random.random() for _ in range(len(x[0]) + 1)]    #beta or w coefficients 
-        for epoch in range(noEpochs):
+        for _ in range(noEpochs):
             # TBA: shuffle the trainind examples in order to prevent cycles
             for i in range(len(x)): # for each sample from the training data
                 ycomputed = self.eval(x[i])     # estimate the output
@@ -31,8 +30,6 @@ class MySGDRegression:
 
     def eval(self, xi):
         yi = self.coef_[-1]
-        # intrebare: cand chemam predict dupa fit, nu cumva ultimul coeficient din coef_ nu este cel liber?
-        # De vreme ce am facut slice-ul coeficientilor la finalul fit-ului... 
         for j in range(len(xi)):
             yi += self.coef_[j] * xi[j]
         return yi 
@@ -76,13 +73,13 @@ class MyBatchRegression:
         @param batchSize: dimension of a batch - used to divide the dataset into smaller groups and train them simultaneously
         '''
         
-        if batchSize is None:
+        if batchSize is None: # define the size of a batch
             batchSize = len(y)
         
-        if theta is None:
+        if theta is None: # initialize the weights (equation variables)
             theta = np.random.randn(3,1)
         m = len(y)
-        #n_batches = int(m/batchSize)
+        #number_of_batches = int(m/batchSize)
         
         for _ in range(epochs):
             indices = np.random.permutation(m) # shuffle the data to avoid cycles
@@ -93,11 +90,10 @@ class MyBatchRegression:
                 y_i = y[i:i+batchSize]
                 
                 X_i = np.c_[np.ones(len(X_i)),X_i] # append columnwise column vector of ones to X batch (=> the shape of matrix we desire)
-               
+                
                 prediction = np.dot(X_i,theta)
-    
+                
                 theta = theta -(1/m)*eta*( X_i.T.dot((prediction - y_i)))
-
         
         self.intercept_ = theta[-1][0]
         self.coef_ = [coef[0] for coef in theta[:-1]]

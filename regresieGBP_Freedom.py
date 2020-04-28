@@ -10,9 +10,10 @@ Created on 24 apr. 2020
 import Regression
 from sklearn.metrics.regression import mean_squared_error
 from Regression import MyBatchRegression
+from mpl_toolkits import mplot3d
+from copy import deepcopy
 
-def plot3Ddata(x1Train, x2Train, yTrain, x1Model = None, x2Model = None, yModel = None, x1Test = None, x2Test = None, yTest = None, title = None):
-    from mpl_toolkits import mplot3d
+def plot3Ddata(x1Train, x2Train, yTrain, x1Model = None, x2Model = None, yModel = None, x1Test = None, x2Test = None, yTest = None, title = None):    
     ax = plt.axes(projection = '3d')
     if (x1Train):
         plt.scatter(x1Train, x2Train, yTrain, c = 'r', marker = 'o', label = 'train data') 
@@ -32,8 +33,9 @@ def plot3Ddata(x1Train, x2Train, yTrain, x1Model = None, x2Model = None, yModel 
 
 from utils import *
 from random import seed
-import os, numpy as np
-from normalizare import statisticalNormalisation
+import os
+import numpy as np
+from normalizare import stdNorm
 
 
 
@@ -58,21 +60,39 @@ def inputRead():
     testInputs = [inputs[i] for i in testSample]
     testOutputs = [outputs[i] for i in testSample]
     
-    #NORMALIZATION OF TEST DATA
-    feature1test = [el for el,_ in testInputs]
-    feature2test = [el for _,el in testInputs]
-    feature1test = statisticalNormalisation(feature1test)
-    feature2test = statisticalNormalisation(feature2test)
-    testInputs = [[el,el2] for el,el2 in zip(feature1test,feature2test)]
-    testOutputs = statisticalNormalisation(testOutputs)
+    norm = stdNorm()
     
-    #NORMALIZATION OF TRAIN DATA
+    
+    
     feature1train = [el for el,_ in trainInputs]
     feature2train = [el for _,el in trainInputs]
-    feature1train = statisticalNormalisation(feature1train)
-    feature2train = statisticalNormalisation(feature2train)
+    
+    feature1test = [el for el,_ in testInputs]
+    feature2test = [el for _,el in testInputs]
+    
+    #NORMALIZATION OF ALL DATA
+    featuresComplet = []
+    for feat in deepcopy(feature1train):
+        featuresComplet.append(feat)
+    for feat in deepcopy(feature1test):
+        featuresComplet.append(feat)
+    for feat in deepcopy(feature2train):
+        featuresComplet.append(feat)
+    for feat in deepcopy(feature2test):
+        featuresComplet.append(feat)
+    norm.statisticalNormalisation(featuresComplet)
+    
+    #NORMALIZATION OF TRAIN DATA
+    feature1train = norm.statisticalNormalisation(feature1train)
+    feature2train = norm.statisticalNormalisation(feature2train)
     trainInputs = [[el,el2] for el,el2 in zip(feature1train,feature2train)]
-    trainOutputs = statisticalNormalisation(trainOutputs)
+    trainOutputs = norm.statisticalNormalisation(trainOutputs)
+    
+    #NORMALIZATION OF TEST DATA
+    feature1test = norm.statisticalNormalisation(feature1test)
+    feature2test = norm.statisticalNormalisation(feature2test)
+    testInputs = [[el,el2] for el,el2 in zip(feature1test,feature2test)]
+    testOutputs = norm.statisticalNormalisation(testOutputs)
     
     return trainInputs, trainOutputs, feature1train, feature2train, testInputs, testOutputs, feature1test, feature2test
 
@@ -84,10 +104,10 @@ def fun():
     
     trainInputs, trainOutputs, feature1train, feature2train, testInputs, testOutputs, feature1test, feature2test = inputRead()
     
-    #plotDataHistogram(feature1train+feature1test, 'Capita GDP')
-    #plotDataHistogram(feature2train+feature2test, 'Freedom')
-    #plotDataHistogram(trainOutputs+testOutputs, 'Happiness score')
-    #plotData3D(trainInputs+testInputs, trainOutputs+testOutputs)
+    plotDataHistogram(feature1train+feature1test, 'Capita GDP')
+    plotDataHistogram(feature2train+feature2test, 'Freedom')
+    plotDataHistogram(trainOutputs+testOutputs, 'Happiness score')
+    plotData3D(trainInputs+testInputs, trainOutputs+testOutputs)
     # uncomment these when visualising data
     
     
